@@ -1,10 +1,10 @@
 module ram_handler (
     input location,         // location of the value from ram to be added to target value
-    input state,            // 1 for retrieve, 2 for soft reset (write), 3 for hard reset (reset), 0 do nothing
+    input state,            // 0 for read, 1 for write
     input clk,    
     input in_number[7],     // used only for writing
 
-    output out_number[7]
+    output out_number[7]    // output data in location
   ) {
 
   .clk(clk) {

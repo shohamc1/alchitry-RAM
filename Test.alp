@@ -2,8 +2,10 @@
 <project name="Test" board="Alchitry Au" language="Lucid" version="3">
   <files>
     <src>writer.luc</src>
+    <src>random.luc</src>
     <src top="true">au_top.luc</src>
     <component>simple_ram.v</component>
+    <src>game_engine.luc</src>
     <component>reset_conditioner.luc</component>
     <src>ram_handler.luc</src>
     <constraint lib="true">alchitry.acf</constraint>

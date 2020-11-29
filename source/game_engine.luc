@@ -1,0 +1,76 @@
+module game_engine (
+    input clk,  // clock
+    input rst,  // reset
+    output target_out[7],
+    output current_out[7],
+    output btn_a[3],
+    output btn_b[3],
+    output btn_c[3],
+    output btn_d[3]
+  ) {
+  
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    
+    .rst(rst) {
+      random random;
+      fsm state = {BEGIN, CURRENT};
+      dff target_value[7](#INIT(0));
+      dff current_value[7](#INIT(0));
+      dff button_a[3](#INIT(0));
+      dff button_b[3](#INIT(0));
+      dff button_c[3](#INIT(0));
+      dff button_d[3](#INIT(0));
+   }
+  }
+
+  always {
+    target_out = 0;
+    current_out = 0;
+    btn_a = 0;
+    btn_b = 0;
+    btn_c = 0;
+    btn_d = 0;
+    
+    random.next = 0;
+    random.seed = 128h843233523a611966423b622562592c62 + button_a.q;
+    
+    case(state.q) {
+      state.BEGIN:
+        /* this state will 
+           - generate random target value
+           - instantiate current value to 0 (done implicitly in dff declaration
+           - generate random numbers for buttons and store in RAM (using writer)
+        */
+        random.next = 1;
+        random.next = 0;
+        target_value.d[6-:7] = random.num[6-:7];
+        button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
+        button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
+        button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
+        button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        current_out = current_value.q;
+        target_out = target_value.q;
+        btn_a = button_a.q;
+        btn_b = button_b.q;
+        btn_c = button_c.q;
+        btn_d = button_d.q;
+        
+        state.d = state.CURRENT;
+      state.CURRENT:
+        random.next = 1;
+        random.next = 0;
+        button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
+        button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
+        button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
+        button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        current_out = current_value.q;
+        target_out = target_value.q;
+        btn_a = button_a.q;
+        btn_b = button_b.q;
+        btn_c = button_c.q;
+        btn_d = button_d.q;
+        
+  }
+}
