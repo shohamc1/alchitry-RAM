@@ -1,0 +1,35 @@
+module writer (
+    input clk,  // clock
+    input rst,  // reset
+    output out[7]
+  ) {
+  
+  .clk(clk) {
+    // The reset conditioner is used to synchronize the reset signal to the FPGA
+    // clock. This ensures the entire FPGA comes out of reset at the same time.
+    ram_handler ram;
+    .rst(rst) {
+      fsm state = {START, END};
+   }
+  }
+
+  always {
+    out = 0;
+    
+    ram.location = 0;
+    ram.in_number = 0;
+    ram.state = 0;
+    
+    case (state.q) {
+      state.START:
+        ram.state = 1;
+        ram.in_number = 3b011;
+        ram.location = 1;
+        state.d = state.END;        
+      state.END:
+        ram.state = 0;
+        ram.location = 1;
+        out[6-:7] = ram.out_number;
+    }
+  }
+}

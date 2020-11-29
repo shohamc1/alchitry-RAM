@@ -1,0 +1,33 @@
+module ram_handler (
+    input location,         // location of the value from ram to be added to target value
+    input state,            // 1 for retrieve, 2 for soft reset (write), 3 for hard reset (reset), 0 do nothing
+    input clk,    
+    input in_number[7],     // used only for writing
+
+    output out_number[7]
+  ) {
+
+  .clk(clk) {
+      simple_ram ram (#SIZE(7), #DEPTH(6));
+  }
+
+
+  always {   
+    out_number = 0;
+
+    ram.write_en = 0;
+    ram.address = 0;
+    ram.write_data = 16hxxxx;
+
+    if (state == 0) {                  // retrieve values
+        ram.write_en = 0;
+        ram.address = location;
+        out_number = ram.read_data;
+    }
+    else if (state == 1) {             // write values
+        ram.write_en = 1;
+        ram.address = location;
+        ram.write_data = in_number;
+    }
+  }
+}
