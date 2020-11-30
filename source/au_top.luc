@@ -17,6 +17,7 @@ module au_top (
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
+    //new_ge nge;
     .rst(rst) {
       game_engine ge;
     }
@@ -42,5 +43,9 @@ module au_top (
     io_led[1][6-:3] = ge.btn_b[2-:3];
     io_led[2][2-:3] = ge.btn_c[2-:3];
     io_led[2][6-:3] = ge.btn_d[2-:3];
+       
+    //io_led[0][6-:7] = nge.current_out;
+    //nge.btn = io_button;
+    
   }
 }

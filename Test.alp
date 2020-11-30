@@ -3,6 +3,7 @@
   <files>
     <src>writer.luc</src>
     <src>random.luc</src>
+    <src>new_ge.luc</src>
     <src top="true">au_top.luc</src>
     <component>simple_ram.v</component>
     <src>game_engine.luc</src>

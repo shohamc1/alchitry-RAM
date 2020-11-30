@@ -16,7 +16,7 @@ module game_engine (
     
     .rst(rst) {      
       random random;
-      fsm state = {BEGIN, CURRENT};
+      fsm state = {BEGIN, CURRENT, INCREMENT_1, INTERM};
       dff target_value[7](#INIT(0));
       //dff current_value[7](#INIT(0));
       dff button_a[3](#INIT(0));
@@ -106,11 +106,12 @@ module game_engine (
         btn_d = tmp[6-:7];
         
         if (btn[0]) {
-          btn_sig = tmp + 1; // cv + 1 works
+          // btn_sig = tmp; // cv + 1 works
+          state.d = state.INCREMENT_1;
           
-          ram.state = 1;
-          ram.location = 0;
-          ram.in_number = btn_sig; // this changes the value to 1 but doesnt increase further; RAM write works
+          // ram.state = 1;
+          // ram.location = 0;
+          // ram.in_number = tmp; // this changes the value to 1 but doesnt increase further; RAM write works
           // current_value.d = $unsigned(tmp) + $unsigned(btn_sig);
         }
         else if (btn[1]) {
@@ -136,6 +137,19 @@ module game_engine (
           ram.location = 0;
           ram.in_number = tmp + btn_sig;
           // current_value.d = tmp + btn_sig;
-        }   
+        }
+      state.INCREMENT_1:
+        current_out = 127;
+        ram.state = 0;
+        ram.location = 0;
+        tmp = ram.out_number;
+        
+        ram.state = 1;
+        ram.in_number = ram.out_number + 1;
+        ram.location = 0;
+        state.d = state.INTERM;
+      state.INTERM:
+        current_out = 7b1111110;
+        state.d = state.CURRENT;   
   }
 }

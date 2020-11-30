@@ -1,0 +1,31 @@
+module new_ge (
+    input clk,  // clock
+    input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT
+    output target_out[7],
+    output current_out[7]
+  ) {
+  
+  sig temp[7];
+  
+  .clk(clk) {
+    ram_handler ram;
+  }
+
+  always {
+    ram.state = 0;
+    ram.location = 0;
+    current_out = ram.out_number;
+    temp = ram.out_number;
+    
+    ram.in_number = 0;
+
+    target_out = 99;
+    
+    if (btn[0]) {
+      temp = temp + 2;
+      ram.state = 1;
+      ram.location = 0;
+      ram.in_number = temp;
+    }        
+  }
+}
