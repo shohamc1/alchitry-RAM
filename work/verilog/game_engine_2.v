@@ -43,12 +43,12 @@ module game_engine_2 (
     .seed(M_random_seed),
     .num(M_random_num)
   );
-  localparam BEGIN_state = 2'd0;
-  localparam CURRENT_state = 2'd1;
-  localparam INCREASE_state = 2'd2;
+  localparam BEGIN_state = 1'd0;
+  localparam CURRENT_state = 1'd1;
   
-  reg [1:0] M_state_d, M_state_q = BEGIN_state;
+  reg M_state_d, M_state_q = BEGIN_state;
   reg [6:0] M_target_value_d, M_target_value_q = 1'h0;
+  reg [6:0] M_current_value_d, M_current_value_q = 1'h0;
   reg [2:0] M_button_a_d, M_button_a_q = 1'h0;
   reg [2:0] M_button_b_d, M_button_b_q = 1'h0;
   reg [2:0] M_button_c_d, M_button_c_q = 1'h0;
@@ -61,6 +61,7 @@ module game_engine_2 (
     M_button_d_d = M_button_d_q;
     M_button_c_d = M_button_c_q;
     M_target_value_d = M_target_value_q;
+    M_current_value_d = M_current_value_q;
     
     target_out = 1'h0;
     current_out = 1'h0;
@@ -68,13 +69,11 @@ module game_engine_2 (
     btn_b = 1'h0;
     btn_c = 1'h0;
     btn_d = 1'h0;
-    M_ram_location = 1'h0;
-    M_ram_in_number = 1'h0;
-    M_ram_state = 1'h0;
     tmp = 1'h0;
     M_ram_state = 1'h0;
     M_ram_location = 1'h0;
     cv = M_ram_out_number;
+    M_ram_in_number = cv;
     M_random_next = btn[0+0-:1] | btn[1+0-:1] | btn[2+0-:1] | btn[3+0-:1] | btn[4+0-:1];
     M_random_seed = 128'h843233523a611966423b622562592c62 + M_button_a_q;
     
@@ -108,12 +107,13 @@ module game_engine_2 (
         btn_a = M_button_a_q;
         btn_b = M_button_b_q;
         btn_c = M_button_c_q;
-        btn_d = cv;
+        btn_d = M_current_value_q;
         if (btn[0+0-:1]) begin
-          btn_sig = M_button_a_q;
+          M_current_value_d = M_current_value_q + 1'h1;
+          btn_sig = tmp + 1'h1;
           M_ram_state = 1'h1;
           M_ram_location = 1'h0;
-          M_ram_in_number = cv + btn_sig;
+          M_ram_in_number = btn_sig;
         end else begin
           if (btn[1+0-:1]) begin
             btn_sig = M_button_b_q;
@@ -143,6 +143,7 @@ module game_engine_2 (
   always @(posedge clk) begin
     if (rst == 1'b1) begin
       M_target_value_q <= 1'h0;
+      M_current_value_q <= 1'h0;
       M_button_a_q <= 1'h0;
       M_button_b_q <= 1'h0;
       M_button_c_q <= 1'h0;
@@ -150,6 +151,7 @@ module game_engine_2 (
       M_state_q <= 1'h0;
     end else begin
       M_target_value_q <= M_target_value_d;
+      M_current_value_q <= M_current_value_d;
       M_button_a_q <= M_button_a_d;
       M_button_b_q <= M_button_b_d;
       M_button_c_q <= M_button_c_d;

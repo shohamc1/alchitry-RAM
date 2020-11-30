@@ -16,7 +16,7 @@ module game_engine (
     
     .rst(rst) {      
       random random;
-      fsm state = {BEGIN, CURRENT, INCREASE};
+      fsm state = {BEGIN, CURRENT};
       dff target_value[7](#INIT(0));
       //dff current_value[7](#INIT(0));
       dff button_a[3](#INIT(0));
@@ -34,16 +34,13 @@ module game_engine (
     btn_b = 0;
     btn_c = 0;
     btn_d = 0;
-    
-    ram.location = 0;
-    ram.in_number = 0;
-    ram.state = 0;
-    
+   
     tmp = 0;
     
     ram.state = 0;
     ram.location = 0;
     cv = ram.out_number;
+    ram.in_number = cv;
     
     random.next = btn[0] | btn[1] | btn[2] | btn[3] | btn[4];
     random.seed = 128h843233523a611966423b622562592c62 + button_a.q;
@@ -99,21 +96,21 @@ module game_engine (
         ram.state = 0;
         ram.location = 0;
         tmp = ram.out_number;
-        current_out = tmp;
+        current_out = tmp; //should be tmp
         
         target_out = target_value.q;
         
         btn_a = button_a.q; // doubling this makes is 2
         btn_b = button_b.q;
         btn_c = button_c.q;
-        btn_d = cv;
+        btn_d = tmp[6-:7];
         
         if (btn[0]) {
-          btn_sig = button_a.q;
+          btn_sig = tmp + 1; // cv + 1 works
           
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = cv + btn_sig; // this changes the value to 1 but doesnt increase further
+          ram.in_number = btn_sig; // this changes the value to 1 but doesnt increase further; RAM write works
           // current_value.d = $unsigned(tmp) + $unsigned(btn_sig);
         }
         else if (btn[1]) {
