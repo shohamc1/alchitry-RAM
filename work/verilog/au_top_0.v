@@ -34,9 +34,11 @@ module au_top_0 (
   wire [3-1:0] M_ge_btn_b;
   wire [3-1:0] M_ge_btn_c;
   wire [3-1:0] M_ge_btn_d;
+  reg [5-1:0] M_ge_btn;
   game_engine_2 ge (
     .clk(clk),
     .rst(rst),
+    .btn(M_ge_btn),
     .target_out(M_ge_target_out),
     .current_out(M_ge_current_out),
     .btn_a(M_ge_btn_a),
@@ -52,8 +54,10 @@ module au_top_0 (
     led = 8'h00;
     io_led = 24'h000000;
     io_seg = 8'hff;
-    io_sel = 4'hf;
-    io_led[0+0+6-:7] = M_ge_target_out[0+6-:7];
+    io_sel = 4'h0;
+    io_seg = 8'h00;
+    M_ge_btn[0+4-:5] = io_button[0+4-:5];
+    io_led[0+0+6-:7] = M_ge_current_out[0+6-:7];
     io_led[8+0+2-:3] = M_ge_btn_a[0+2-:3];
     io_led[8+4+2-:3] = M_ge_btn_b[0+2-:3];
     io_led[16+0+2-:3] = M_ge_btn_c[0+2-:3];

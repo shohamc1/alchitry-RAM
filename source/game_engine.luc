@@ -1,6 +1,7 @@
 module game_engine (
     input clk,  // clock
     input rst,  // reset
+    input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT
     output target_out[7],
     output current_out[7],
     output btn_a[3],
@@ -8,14 +9,13 @@ module game_engine (
     output btn_c[3],
     output btn_d[3]
   ) {
+  sig tmp[3];
   
   .clk(clk) {
-    // The reset conditioner is used to synchronize the reset signal to the FPGA
-    // clock. This ensures the entire FPGA comes out of reset at the same time.
     
-    .rst(rst) {
+    .rst(rst) {      
       random random;
-      fsm state = {BEGIN, CURRENT};
+      fsm state = {BEGIN, CURRENT, INCREASE};
       dff target_value[7](#INIT(0));
       dff current_value[7](#INIT(0));
       dff button_a[3](#INIT(0));
@@ -23,6 +23,7 @@ module game_engine (
       dff button_c[3](#INIT(0));
       dff button_d[3](#INIT(0));
    }
+    
   }
 
   always {
@@ -33,44 +34,74 @@ module game_engine (
     btn_c = 0;
     btn_d = 0;
     
-    random.next = 0;
+    tmp = 0;
+    
+    random.next = btn[0] | btn[1] | btn[2] | btn[3] | btn[4];
     random.seed = 128h843233523a611966423b622562592c62 + button_a.q;
     
     case(state.q) {
       state.BEGIN:
         /* this state will 
            - generate random target value
-           - instantiate current value to 0 (done implicitly in dff declaration
+           - instantiate current value to 0 (done implicitly in dff declaration)
            - generate random numbers for buttons and store in RAM (using writer)
         */
-        random.next = 1;
-        random.next = 0;
         target_value.d[6-:7] = random.num[6-:7];
-        button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
-        button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
-        button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
-        button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
-        current_out = current_value.q;
+        // button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
+        // button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
+        // button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
+        // button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        button_a.d = 3b001; // 1
+        button_b.d = 3b011; // 3
+        button_c.d = 3b101; // 5
+        button_d.d = 3b111; // 7
         target_out = target_value.q;
-        btn_a = button_a.q;
+        current_out = current_value.q;
+        btn_a = button_a.q;        
         btn_b = button_b.q;
         btn_c = button_c.q;
-        btn_d = button_d.q;
-        
+        btn_d = button_d.q;    
         state.d = state.CURRENT;
+
       state.CURRENT:
-        random.next = 1;
-        random.next = 0;
-        button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
-        button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
-        button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
-        button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        // current state: tmp == button_a correctly, seems to be an issue assigning current_value to tmp
+        // when setting button to a constant, updater works properly, might be an issue of random numbers being updated too early
+        
+        // button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
+        // button_a.d[2-:3] = 3b001;
+        // button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
+        // button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
+        // button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        
+        button_a.d = 3b001; // 1
+        button_b.d = 3b011; // 3
+        button_c.d = 3b101; // 5
+        button_d.d = 3b111; // 7
+        
         current_out = current_value.q;
+        tmp = current_value.q;
         target_out = target_value.q;
+        
         btn_a = button_a.q;
         btn_b = button_b.q;
         btn_c = button_c.q;
         btn_d = button_d.q;
         
+        if (btn[0]) {
+          tmp = button_a.q;
+          current_value.d = tmp;
+        }
+        else if (btn[1]) {
+          tmp = button_b.q;
+          current_value.d = tmp;
+        }
+        else if (btn[2]) {
+          tmp = button_c.q;
+          current_value.d = tmp;
+        }
+        else if (btn[3]) {
+          tmp = button_d.q;
+          current_value.d = tmp;
+        }   
   }
 }
