@@ -85,8 +85,10 @@ OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_verilog -library xil_defaultlib {
   C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/game_engine_2.v
-  C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/random_3.v
+  C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/ram_handler_3.v
+  C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/random_4.v
   C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/reset_conditioner_1.v
+  C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/simple_ram_5.v
   C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.srcs/sources_1/imports/verilog/au_top_0.v
 }
 OPTRACE "Adding files" END { }

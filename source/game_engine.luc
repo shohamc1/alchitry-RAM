@@ -9,15 +9,16 @@ module game_engine (
     output btn_c[3],
     output btn_d[3]
   ) {
-  sig tmp[3];
+  sig tmp[7], btn_sig[7], cv[7];
   
   .clk(clk) {
+    ram_handler ram;
     
     .rst(rst) {      
       random random;
       fsm state = {BEGIN, CURRENT, INCREASE};
       dff target_value[7](#INIT(0));
-      dff current_value[7](#INIT(0));
+      //dff current_value[7](#INIT(0));
       dff button_a[3](#INIT(0));
       dff button_b[3](#INIT(0));
       dff button_c[3](#INIT(0));
@@ -34,7 +35,15 @@ module game_engine (
     btn_c = 0;
     btn_d = 0;
     
+    ram.location = 0;
+    ram.in_number = 0;
+    ram.state = 0;
+    
     tmp = 0;
+    
+    ram.state = 0;
+    ram.location = 0;
+    cv = ram.out_number;
     
     random.next = btn[0] | btn[1] | btn[2] | btn[3] | btn[4];
     random.seed = 128h843233523a611966423b622562592c62 + button_a.q;
@@ -56,11 +65,17 @@ module game_engine (
         button_c.d = 3b101; // 5
         button_d.d = 3b111; // 7
         target_out = target_value.q;
-        current_out = current_value.q;
-        btn_a = button_a.q;        
+        //current_out = current_value.q;
+        btn_a = button_a.q;
         btn_b = button_b.q;
         btn_c = button_c.q;
-        btn_d = button_d.q;    
+        btn_d = button_d.q;
+        
+        // put 0 in ram
+        ram.state = 1;
+        ram.location = 0;
+        ram.in_number = 0;
+        
         state.d = state.CURRENT;
 
       state.CURRENT:
@@ -78,30 +93,52 @@ module game_engine (
         button_c.d = 3b101; // 5
         button_d.d = 3b111; // 7
         
-        current_out = current_value.q;
-        tmp = current_value.q;
+        // current_out = current_value.q;
+        // tmp = current_value.q;
+        
+        ram.state = 0;
+        ram.location = 0;
+        tmp = ram.out_number;
+        current_out = tmp;
+        
         target_out = target_value.q;
         
-        btn_a = button_a.q;
+        btn_a = button_a.q; // doubling this makes is 2
         btn_b = button_b.q;
         btn_c = button_c.q;
-        btn_d = button_d.q;
+        btn_d = cv;
         
         if (btn[0]) {
-          tmp = button_a.q;
-          current_value.d = tmp;
+          btn_sig = button_a.q;
+          
+          ram.state = 1;
+          ram.location = 0;
+          ram.in_number = cv + btn_sig; // this changes the value to 1 but doesnt increase further
+          // current_value.d = $unsigned(tmp) + $unsigned(btn_sig);
         }
         else if (btn[1]) {
-          tmp = button_b.q;
-          current_value.d = tmp;
+          btn_sig = button_b.q;
+          
+          ram.state = 1;
+          ram.location = 0;
+          ram.in_number = tmp + btn_sig;
+          // current_value.d = tmp + btn_sig;
         }
         else if (btn[2]) {
-          tmp = button_c.q;
-          current_value.d = tmp;
+          btn_sig = button_c.q;
+          
+          ram.state = 1;
+          ram.location = 0;
+          ram.in_number = tmp + btn_sig;
+          // current_value.d = tmp + btn_sig;
         }
         else if (btn[3]) {
-          tmp = button_d.q;
-          current_value.d = tmp;
+          btn_sig = button_d.q;
+          
+          ram.state = 1;
+          ram.location = 0;
+          ram.in_number = tmp + btn_sig;
+          // current_value.d = tmp + btn_sig;
         }   
   }
 }

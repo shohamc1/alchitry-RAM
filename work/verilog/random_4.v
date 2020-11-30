@@ -8,7 +8,7 @@
    Parameters:
      SEED = 128h843233523a613966423b622562592c62
 */
-module random_3 (
+module random_4 (
     input clk,
     input rst,
     input next,
