@@ -8,7 +8,6 @@ module game_engine_2 (
     input clk,
     input rst,
     input [4:0] btn,
-    output reg [6:0] target_out,
     output reg [6:0] current_out,
     output reg [2:0] btn_a,
     output reg [2:0] btn_b,
@@ -17,9 +16,6 @@ module game_engine_2 (
   );
   
   
-  
-  reg [6:0] btn_sig;
-  reg [6:0] tmp;
   
   wire [7-1:0] M_ram_out_number;
   reg [1-1:0] M_ram_location;
@@ -42,125 +38,139 @@ module game_engine_2 (
     .seed(M_random_seed),
     .num(M_random_num)
   );
-  localparam BEGIN_state = 2'd0;
-  localparam CURRENT_state = 2'd1;
-  localparam INCREMENT_1_state = 2'd2;
-  localparam INTERM_state = 2'd3;
-  
-  reg [1:0] M_state_d, M_state_q = BEGIN_state;
-  reg [6:0] M_target_value_d, M_target_value_q = 1'h0;
   reg [2:0] M_button_a_d, M_button_a_q = 1'h0;
   reg [2:0] M_button_b_d, M_button_b_q = 1'h0;
   reg [2:0] M_button_c_d, M_button_c_q = 1'h0;
   reg [2:0] M_button_d_d, M_button_d_q = 1'h0;
+  reg [6:0] M_current_d, M_current_q = 1'h0;
+  reg [6:0] M_target_d, M_target_q = 5'h14;
+  reg [1:0] M_temp_d, M_temp_q = 1'h0;
+  localparam BEGIN_state = 3'd0;
+  localparam IDLE_state = 3'd1;
+  localparam ADDITION_state = 3'd2;
+  localparam COMPARE_state = 3'd3;
+  localparam RESULT_state = 3'd4;
+  
+  reg [2:0] M_state_d, M_state_q = BEGIN_state;
   
   always @* begin
     M_state_d = M_state_q;
     M_button_b_d = M_button_b_q;
     M_button_a_d = M_button_a_q;
     M_button_d_d = M_button_d_q;
+    M_current_d = M_current_q;
+    M_temp_d = M_temp_q;
     M_button_c_d = M_button_c_q;
-    M_target_value_d = M_target_value_q;
+    M_target_d = M_target_q;
     
-    target_out = 1'h0;
+    M_random_seed = 128'h843233523a61357423b6225651512c62;
+    M_random_next = btn[0+0-:1] | btn[1+0-:1] | btn[2+0-:1] | btn[3+0-:1] | btn[4+0-:1];
     current_out = 1'h0;
     btn_a = 1'h0;
     btn_b = 1'h0;
     btn_c = 1'h0;
     btn_d = 1'h0;
-    tmp = 1'h0;
+    M_ram_location = 1'bx;
     M_ram_state = 1'h0;
-    M_ram_location = 1'h0;
     M_ram_in_number = 1'h0;
-    M_random_next = btn[0+0-:1] | btn[1+0-:1] | btn[2+0-:1] | btn[3+0-:1] | btn[4+0-:1];
-    M_random_seed = 128'h843233523a611966423b622562592c62 + M_button_a_q;
     
     case (M_state_q)
       BEGIN_state: begin
-        M_target_value_d[0+6-:7] = M_random_num[0+6-:7];
-        M_button_a_d = 3'h1;
-        M_button_b_d = 3'h3;
-        M_button_c_d = 3'h5;
-        M_button_d_d = 3'h7;
-        target_out = M_target_value_q;
+        M_button_a_d = M_random_num[0+2-:3] + M_random_num[5+1-:2];
+        M_button_b_d = M_random_num[2+2-:3] + M_random_num[13+1-:2];
+        M_button_c_d = M_random_num[7+2-:3] + M_random_num[4+1-:2];
+        M_button_d_d = M_random_num[8+2-:3] + M_random_num[2+1-:2];
+        M_ram_state = 1'h1;
+        M_ram_location = 1'h0;
+        M_ram_in_number = 1'h1;
+        M_state_d = IDLE_state;
+      end
+      IDLE_state: begin
         btn_a = M_button_a_q;
         btn_b = M_button_b_q;
         btn_c = M_button_c_q;
         btn_d = M_button_d_q;
-        M_ram_state = 1'h1;
-        M_ram_location = 1'h0;
-        M_ram_in_number = 1'h0;
-        M_state_d = CURRENT_state;
-      end
-      CURRENT_state: begin
-        M_button_a_d = 3'h1;
-        M_button_b_d = 3'h3;
-        M_button_c_d = 3'h5;
-        M_button_d_d = 3'h7;
+        M_target_d = 5'h14;
         M_ram_state = 1'h0;
         M_ram_location = 1'h0;
-        tmp = M_ram_out_number;
-        current_out = tmp;
-        target_out = M_target_value_q;
+        current_out = M_ram_out_number;
+        M_current_d = M_ram_out_number;
+        if (btn[1+0-:1] == 1'h1) begin
+          M_state_d = ADDITION_state;
+          M_temp_d = 1'h0;
+        end else begin
+          if (btn[2+0-:1] == 1'h1) begin
+            M_state_d = ADDITION_state;
+            M_temp_d = 1'h1;
+          end
+        end
+        if (btn[3+0-:1] == 1'h1) begin
+          M_state_d = BEGIN_state;
+        end
+      end
+      ADDITION_state: begin
+        if (M_temp_q == 1'h0) begin
+          M_ram_state = 1'h1;
+          M_ram_location = 1'h0;
+          M_ram_in_number = M_current_q + M_button_a_q;
+        end else begin
+          if (M_temp_q == 1'h1) begin
+            M_ram_state = 1'h1;
+            M_ram_location = 1'h0;
+            M_ram_in_number = M_current_q + M_button_b_q;
+          end
+        end
+        M_state_d = COMPARE_state;
+      end
+      COMPARE_state: begin
+        if (M_ram_out_number >= M_target_q) begin
+          M_ram_state = 1'h1;
+          M_ram_location = 1'h0;
+          M_ram_in_number = 7'h7f;
+        end
+        M_state_d = RESULT_state;
+      end
+      RESULT_state: begin
         btn_a = M_button_a_q;
         btn_b = M_button_b_q;
         btn_c = M_button_c_q;
-        btn_d = tmp[0+6-:7];
-        if (btn[0+0-:1]) begin
-          M_state_d = INCREMENT_1_state;
-        end else begin
-          if (btn[1+0-:1]) begin
-            btn_sig = M_button_b_q;
-            M_ram_state = 1'h1;
-            M_ram_location = 1'h0;
-            M_ram_in_number = tmp + btn_sig;
-          end else begin
-            if (btn[2+0-:1]) begin
-              btn_sig = M_button_c_q;
-              M_ram_state = 1'h1;
-              M_ram_location = 1'h0;
-              M_ram_in_number = tmp + btn_sig;
-            end else begin
-              if (btn[3+0-:1]) begin
-                btn_sig = M_button_d_q;
-                M_ram_state = 1'h1;
-                M_ram_location = 1'h0;
-                M_ram_in_number = tmp + btn_sig;
-              end
-            end
-          end
-        end
-      end
-      INCREMENT_1_state: begin
+        btn_d = M_button_d_q;
         M_ram_state = 1'h0;
         M_ram_location = 1'h0;
-        tmp = M_ram_out_number;
-        current_out = tmp + 1'h1;
-        M_ram_state = 1'h1;
-        M_ram_in_number = tmp + 1'h1;
-        M_ram_location = 1'h0;
-      end
-      INTERM_state: begin
-        current_out = 7'h7e;
-        M_state_d = CURRENT_state;
+        current_out = M_ram_out_number;
+        M_current_d = M_ram_out_number;
+        if (btn[0+0-:1] == 1'h1) begin
+          M_state_d = IDLE_state;
+          M_button_a_d = M_random_num[0+2-:3] + M_random_num[5+1-:2];
+          M_button_b_d = M_random_num[6+2-:3] + M_random_num[4+1-:2];
+          M_button_c_d = M_random_num[0+2-:3] + M_random_num[10+1-:2];
+          M_button_d_d = M_random_num[5+1-:2] + M_random_num[2+1-:2];
+        end
+        if (btn[3+0-:1] == 1'h1) begin
+          M_state_d = BEGIN_state;
+        end
       end
     endcase
   end
   
   always @(posedge clk) begin
     if (rst == 1'b1) begin
-      M_target_value_q <= 1'h0;
       M_button_a_q <= 1'h0;
       M_button_b_q <= 1'h0;
       M_button_c_q <= 1'h0;
       M_button_d_q <= 1'h0;
+      M_current_q <= 1'h0;
+      M_target_q <= 5'h14;
+      M_temp_q <= 1'h0;
       M_state_q <= 1'h0;
     end else begin
-      M_target_value_q <= M_target_value_d;
       M_button_a_q <= M_button_a_d;
       M_button_b_q <= M_button_b_d;
       M_button_c_q <= M_button_c_d;
       M_button_d_q <= M_button_d_d;
+      M_current_q <= M_current_d;
+      M_target_q <= M_target_d;
+      M_temp_q <= M_temp_d;
       M_state_q <= M_state_d;
     end
   end

@@ -28,7 +28,6 @@ module au_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  wire [7-1:0] M_ge_target_out;
   wire [7-1:0] M_ge_current_out;
   wire [3-1:0] M_ge_btn_a;
   wire [3-1:0] M_ge_btn_b;
@@ -39,7 +38,6 @@ module au_top_0 (
     .clk(clk),
     .rst(rst),
     .btn(M_ge_btn),
-    .target_out(M_ge_target_out),
     .current_out(M_ge_current_out),
     .btn_a(M_ge_btn_a),
     .btn_b(M_ge_btn_b),

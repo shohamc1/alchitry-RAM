@@ -14,7 +14,8 @@ module game_engine (
  
   .clk(clk) {
     ram_handler ram; //we use our ram only for storing current
-    .rst(rst) {      
+    .rst(rst) {
+      random random;  
       dff button_a[3](#INIT(0));
       dff button_b[3](#INIT(0));
       dff button_c[3](#INIT(0));
@@ -23,7 +24,6 @@ module game_engine (
       dff target[7](#INIT(20));  //where the target value is stored for checking in state.COMPARE
       dff temp[2](#INIT(0));
       fsm state = {BEGIN, IDLE, ADDITION, COMPARE, RESULT};
-
    }
    
   }
@@ -31,6 +31,8 @@ module game_engine (
     
 
   always {
+    random.seed = 128h843233523a61357423b6225651512c62;
+    random.next = btn[0] | btn[1] | btn[2] | btn[3] | btn[4];
 
     current_out = 0;
     btn_a = 0;
@@ -50,10 +52,10 @@ module game_engine (
 
         */
 
-        button_a.d = 1;
-        button_b.d = 3;
-        button_c.d = 5;
-        button_d.d = 7;
+        button_a.d = random.num[2-:3] + random.num[6-:2];
+        button_b.d = random.num[4-:3] + random.num[14-:2];
+        button_c.d = random.num[9-:3] + random.num[5-:2];
+        button_d.d = random.num[10-:3] + random.num[3-:2];
         
         ram.state=1;
         ram.location=0;
@@ -61,12 +63,13 @@ module game_engine (
 
        
         state.d = state.IDLE;
-      state.IDLE:
+        state.IDLE:
         
         btn_a=button_a.q;
         btn_b=button_b.q;
         btn_c=button_c.q;
         btn_d=button_d.q;
+        target.d = 20;
         
         ram.state=0;
         ram.location=0;
@@ -127,10 +130,14 @@ module game_engine (
         current.d = ram.out_number;
         if (btn[0]==1) {
           state.d = state.IDLE;  //Press btn[0] for next player's turn, and the process will repeat till the losing condition is met, and a different io_led will be shown. 
+          button_a.d = random.num[2-:3] + random.num[6-:2];
+          button_b.d = random.num[8-:3] + random.num[5-:2];
+          button_c.d = random.num[2-:3] + random.num[11-:2];
+          button_d.d = random.num[6-:2] + random.num[3-:2];
         }
         if (btn[3]==1) {
           state.d = state.BEGIN; //reset button
-         }
+        }
     }
   }
 }
