@@ -1,155 +1,136 @@
 module game_engine (
     input clk,  // clock
     input rst,  // reset
-    input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT
-    output target_out[7],
+    input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT, 4-RIGHT 
+
     output current_out[7],
     output btn_a[3],
     output btn_b[3],
     output btn_c[3],
     output btn_d[3]
+    //output target[7]
   ) {
-  sig tmp[7], btn_sig[7], cv[7];
-  
+  //const TARGET = 20; 
+ 
   .clk(clk) {
-    ram_handler ram;
-    
+    ram_handler ram; //we use our ram only for storing current
     .rst(rst) {      
-      random random;
-      fsm state = {BEGIN, CURRENT, INCREMENT_1, INTERM};
-      dff target_value[7](#INIT(0));
-      //dff current_value[7](#INIT(0));
       dff button_a[3](#INIT(0));
       dff button_b[3](#INIT(0));
       dff button_c[3](#INIT(0));
-      dff button_d[3](#INIT(0));
+      dff button_d[3](#INIT(0)); 
+      dff current[7](#INIT(0));  // for storing the current value in the ram temporarily for addition purpose. 
+      dff target[7](#INIT(20));  //where the target value is stored for checking in state.COMPARE
+      dff temp[2](#INIT(0));
+      fsm state = {BEGIN, IDLE, ADDITION, COMPARE, RESULT};
+
    }
-    
+   
   }
 
+    
+
   always {
-    target_out = 0;
+
     current_out = 0;
     btn_a = 0;
     btn_b = 0;
     btn_c = 0;
     btn_d = 0;
    
-    tmp = 0;
-    
+    ram.location = 1bx;
     ram.state = 0;
-    ram.location = 0;
-    cv = ram.out_number;
-    ram.in_number = cv;
-    
-    random.next = btn[0] | btn[1] | btn[2] | btn[3] | btn[4];
-    random.seed = 128h843233523a611966423b622562592c62 + button_a.q;
+    ram.in_number = 0;
     
     case(state.q) {
       state.BEGIN:
         /* this state will 
-           - generate random target value
+       
            - instantiate current value to 0 (done implicitly in dff declaration)
-           - generate random numbers for buttons and store in RAM (using writer)
-        */
-        target_value.d[6-:7] = random.num[6-:7];
-        // button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
-        // button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
-        // button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
-        // button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
-        button_a.d = 3b001; // 1
-        button_b.d = 3b011; // 3
-        button_c.d = 3b101; // 5
-        button_d.d = 3b111; // 7
-        target_out = target_value.q;
-        //current_out = current_value.q;
-        btn_a = button_a.q;
-        btn_b = button_b.q;
-        btn_c = button_c.q;
-        btn_d = button_d.q;
-        
-        // put 0 in ram
-        ram.state = 1;
-        ram.location = 0;
-        ram.in_number = 0;
-        
-        state.d = state.CURRENT;
 
-      state.CURRENT:
-        // current state: tmp == button_a correctly, seems to be an issue assigning current_value to tmp
-        // when setting button to a constant, updater works properly, might be an issue of random numbers being updated too early
+        */
+
+        button_a.d = 1;
+        button_b.d = 3;
+        button_c.d = 5;
+        button_d.d = 7;
         
-        // button_a.d[2-:3] = random.num[2-:3] + random.num[6-:2];
-        // button_a.d[2-:3] = 3b001;
-        // button_b.d[2-:3] = random.num[4-:3] + random.num[14-:2];
-        // button_c.d[2-:3] = random.num[9-:3] + random.num[5-:2];
-        // button_d.d[2-:3] = random.num[10-:3] + random.num[3-:2];
+        ram.state=1;
+        ram.location=0;
+        ram.in_number=1;
+
+       
+        state.d = state.IDLE;
+      state.IDLE:
         
-        button_a.d = 3b001; // 1
-        button_b.d = 3b011; // 3
-        button_c.d = 3b101; // 5
-        button_d.d = 3b111; // 7
+        btn_a=button_a.q;
+        btn_b=button_b.q;
+        btn_c=button_c.q;
+        btn_d=button_d.q;
         
-        // current_out = current_value.q;
-        // tmp = current_value.q;
-        
-        ram.state = 0;
-        ram.location = 0;
-        tmp = ram.out_number;
-        current_out = tmp; //should be tmp
-        
-        target_out = target_value.q;
-        
-        btn_a = button_a.q; // doubling this makes is 2
-        btn_b = button_b.q;
-        btn_c = button_c.q;
-        btn_d = tmp[6-:7];
-        
-        if (btn[0]) {
-          // btn_sig = tmp; // cv + 1 works
-          state.d = state.INCREMENT_1;
-          
-          // ram.state = 1;
-          // ram.location = 0;
-          // ram.in_number = tmp; // this changes the value to 1 but doesnt increase further; RAM write works
-          // current_value.d = $unsigned(tmp) + $unsigned(btn_sig);
+        ram.state=0;
+        ram.location=0;
+        current_out=ram.out_number;
+        current.d = ram.out_number;
+        if (btn[1]==1) {
+          state.d = state.ADDITION;
+          temp.d = 0;
+        } else if (btn[2]==1){
+          state.d = state.ADDITION;
+          temp.d = 1;
         }
-        else if (btn[1]) {
-          btn_sig = button_b.q;
-          
+               
+        if (btn[3]==1) {
+          state.d = state.BEGIN; //reset button
+          }
+
+      state.ADDITION:
+        /*
+        This state will add the value assigned to the button to the current value.
+        The addition is done automatically using the dff temp. 
+           If temp.q == 0, it means that btn[1] is pressed, and thus value in button a is added to the current value.
+           If temp.q == 1, it means that btn[3] is pressed, and thus value in button b is added to the current value. 
+        */
+        
+        if (temp.q == 0) {        
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = tmp + btn_sig;
-          // current_value.d = tmp + btn_sig;
-        }
-        else if (btn[2]) {
-          btn_sig = button_c.q;
-          
+          ram.in_number = current.q + button_a.q;
+        }  
+        else if (temp.q == 1) {
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = tmp + btn_sig;
-          // current_value.d = tmp + btn_sig;
+          ram.in_number = current.q + button_b.q;
         }
-        else if (btn[3]) {
-          btn_sig = button_d.q;
-          
+        state.d = state.COMPARE;
+      state.COMPARE:
+        /*
+        This state will check if the current value stored in the ram has exceeded the target value.
+           If exceeded, 127 will be written to the ram for indication on the io_led in state.RESULT.
+           If not exceeded, it will just jump to state.RESULT for assignment to current_out
+        */
+        if (ram.out_number >= target.q) {
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = tmp + btn_sig;
-          // current_value.d = tmp + btn_sig;
-        }
-      state.INCREMENT_1:
-        current_out = 127;
-        ram.state = 0;
-        ram.location = 0;
-        tmp = ram.out_number;
+          ram.in_number = 127;  //An arbitrary is used here and stored in the ram for indication on the io_led for our checking
+         }  
+        state.d = state.RESULT;
+      state.RESULT:
+        btn_a=button_a.q;
+        btn_b=button_b.q;
+        btn_c=button_c.q;
+        btn_d=button_d.q;
         
-        ram.state = 1;
-        ram.in_number = ram.out_number + 1;
-        ram.location = 0;
-        state.d = state.INTERM;
-      state.INTERM:
-        current_out = 7b1111110;
-        state.d = state.CURRENT;   
+        ram.state=0;
+        ram.location=0;
+        current_out=ram.out_number;
+        current.d = ram.out_number;
+        if (btn[0]==1) {
+          state.d = state.IDLE;  //Press btn[0] for next player's turn, and the process will repeat till the losing condition is met, and a different io_led will be shown. 
+        }
+        if (btn[3]==1) {
+          state.d = state.BEGIN; //reset button
+         }
+    }
   }
 }

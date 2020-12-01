@@ -18,7 +18,7 @@ module ram_handler_3 (
   reg [3-1:0] M_ram_address;
   reg [7-1:0] M_ram_write_data;
   reg [1-1:0] M_ram_write_en;
-  simple_ram_4 #(.SIZE(3'h7), .DEPTH(3'h6)) ram (
+  simple_ram_5 #(.SIZE(3'h7), .DEPTH(3'h6)) ram (
     .clk(clk),
     .address(M_ram_address),
     .write_data(M_ram_write_data),

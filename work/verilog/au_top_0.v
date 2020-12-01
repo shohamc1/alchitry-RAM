@@ -28,14 +28,23 @@ module au_top_0 (
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
-  wire [7-1:0] M_nge_target_out;
-  wire [7-1:0] M_nge_current_out;
-  reg [5-1:0] M_nge_btn;
-  new_ge_2 nge (
+  wire [7-1:0] M_ge_target_out;
+  wire [7-1:0] M_ge_current_out;
+  wire [3-1:0] M_ge_btn_a;
+  wire [3-1:0] M_ge_btn_b;
+  wire [3-1:0] M_ge_btn_c;
+  wire [3-1:0] M_ge_btn_d;
+  reg [5-1:0] M_ge_btn;
+  game_engine_2 ge (
     .clk(clk),
-    .btn(M_nge_btn),
-    .target_out(M_nge_target_out),
-    .current_out(M_nge_current_out)
+    .rst(rst),
+    .btn(M_ge_btn),
+    .target_out(M_ge_target_out),
+    .current_out(M_ge_current_out),
+    .btn_a(M_ge_btn_a),
+    .btn_b(M_ge_btn_b),
+    .btn_c(M_ge_btn_c),
+    .btn_d(M_ge_btn_d)
   );
   
   always @* begin
@@ -47,7 +56,11 @@ module au_top_0 (
     io_seg = 8'hff;
     io_sel = 4'h0;
     io_seg = 8'h00;
-    io_led[0+0+6-:7] = M_nge_current_out;
-    M_nge_btn = io_button;
+    M_ge_btn[0+4-:5] = io_button[0+4-:5];
+    io_led[0+0+6-:7] = M_ge_current_out[0+6-:7];
+    io_led[8+0+2-:3] = M_ge_btn_a[0+2-:3];
+    io_led[8+4+2-:3] = M_ge_btn_b[0+2-:3];
+    io_led[16+0+2-:3] = M_ge_btn_c[0+2-:3];
+    io_led[16+4+2-:3] = M_ge_btn_d[0+2-:3];
   end
 endmodule
