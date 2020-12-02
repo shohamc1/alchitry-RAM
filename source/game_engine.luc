@@ -2,7 +2,6 @@ module game_engine (
     input clk,  // clock
     input rst,  // reset
     //input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT, 4-RIGHT 
-    
     input btn_a_sig,
     input btn_b_sig,
     //input btn_c_sig,
@@ -23,8 +22,10 @@ module game_engine (
  
   .clk(clk) {
     ram_handler ram; //we use our ram only for storing current
+    edge_detector edge_detector(#RISE(1), #FALL(0));
     .rst(rst) {
       random random;  
+      //dff button_a_test[1](#INIT(0));
       dff button_a[4](#INIT(0));
       dff button_b[4](#INIT(0));
       dff button_c[4](#INIT(0));
@@ -40,9 +41,10 @@ module game_engine (
     
 
   always {
+    edge_detector.in = 0;
+    //button_a_test.d = 0;
     random.seed = 128h843233523a61357423b6225651512c62;
     random.next = btn_a_sig | btn_b_sig; //| btn_c_sig | btn_d_sig;
-
     current_out = 0;
 
    
@@ -51,8 +53,8 @@ module game_engine (
     ram.in_number = 0;
     
     target_display = 0;
-    a_display = 0;
-    b_display = 0;
+    a_display = 4hx;
+    b_display = 4hx;
 //    c_display = 0;
 //    d_display = 0;
     
@@ -75,7 +77,7 @@ module game_engine (
 
         state.d = state.IDLE;
       state.IDLE:
-        
+        edge_detector.in = btn_a_sig;
         target.d = 20;
         
         ram.state = 0 ;
@@ -90,7 +92,7 @@ module game_engine (
         //d_display = button_d.q;
         
                 
-        if (btn_a_sig == 1) {
+        if (edge_detector.out == 1) {
           state.d = state.ADDITION;
           temp.d = 0;
         } else if (btn_b_sig == 1){
@@ -113,7 +115,7 @@ module game_engine (
            If temp.q == 0, it means that btn[1] is pressed, and thus value in button a is added to the current value.
            If temp.q == 1, it means that btn[3] is pressed, and thus value in button b is added to the current value. 
         */
-        
+        //button_a_test.d= 0;
         if (temp.q == 0) {        
           ram.state = 1;
           ram.location = 0;

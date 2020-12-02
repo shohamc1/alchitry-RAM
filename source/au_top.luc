@@ -4,6 +4,7 @@ module au_top (
     output led [8],         // 8 user controllable LEDs
     input usb_rx,           // USB->Serial input
     output usb_tx,          // USB->Serial output
+    output io_led[3][8],
 
     
     input a_button,
@@ -28,7 +29,6 @@ module au_top (
     input out_d[7],  
     input out_d1[7],  //tens place for the option d display 
     */
-    
     output option_a[14],
     output option_a_sel[4],
     output option_b[14],
@@ -37,10 +37,10 @@ module au_top (
 //    output option_c_sel[4],
 //    output option_d[14],
 //    output option_d_sel[4],
-    output current[14],
-    output current_sel[4],
-    output target[14],
-    output target_sel[4]
+      output current[14],
+      output current_sel[4]
+//    output target[14],
+//    output target_sel[4]
   ) {
   
   sig rst;                  // reset signal
@@ -71,7 +71,13 @@ module au_top (
     
     led = 8h00;             // turn LEDs off
     
-
+    ge.btn_a_sig = a_button;
+    ge.btn_b_sig = b_button;
+    //ge.btn_c_sig = c_button;
+    //ge.btn_d_sig = d_button;
+    ge.btn_reset_sig = reset_button;
+    ge.next_player_sig = next_player_button;
+    
     
     /*
     ge.btn[4-:5] = io_button[4-:5];    
@@ -91,12 +97,6 @@ module au_top (
     lookup.invalue_current = ge.current_out;
     lookup.invalue_target = ge.target_display;
     
-    ge.btn_a_sig = a_button;
-    ge.btn_b_sig = b_button;
-    //ge.btn_c_sig = c_button;
-    //ge.btn_d_sig = d_button;
-    ge.btn_reset_sig = reset_button;
-    ge.next_player_sig = next_player_button;
     
     seg_a.values = {lookup.out_a, lookup.out_a1};
     seg_b.values = {lookup.out_b, lookup.out_b1};
@@ -117,7 +117,11 @@ module au_top (
     */
     current = current_seg.seg;
     current_sel = ~current_seg.sel;
-    target = target_seg.seg;
-    target_sel = ~target_seg.sel;
+//    target = target_seg.seg;
+//    target_sel = ~target_seg.sel;
+    io_led[0][7-:8] = ge.a_display[3-:4];
+    io_led[1][7-:8] = ge.b_display[3-:4];
+    io_led[2][7-:8] = ge.current_out[6-:7];
+    
   }
 }
