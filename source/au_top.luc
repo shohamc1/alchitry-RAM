@@ -4,22 +4,62 @@ module au_top (
     output led [8],         // 8 user controllable LEDs
     input usb_rx,           // USB->Serial input
     output usb_tx,          // USB->Serial output
-    output io_led [3][8],   // LEDs on IO Shield
-    output io_seg [8],      // 7-segment LEDs on IO Shield
-    output io_sel [4],      // Digit select on IO Shield
-    input io_button [5],    // 5 buttons on IO Shield
-    input io_dip [3][8]     // DIP switches on IO Shield
+
+    
+    input a_button,
+    input b_button,     
+//    input c_button,
+//    input d_button,    
+    input reset_button, 
+    input next_player_button,
+    
+
+    /*    
+    input current_one[7],   //current num ones place 
+    input current_ten[7],   //current num tens place
+    input target_one[7],    //target num ones place 
+    input target_ten[7],    //target num tens place
+    input out_a[7],
+    input out_a1[7], //tens place for the option a display
+    input out_b[7],
+    input out_b1[7], //tens place for the option b display
+    input out_c[7],
+    input out_c1[7], //tens place for the option c display 
+    input out_d[7],  
+    input out_d1[7],  //tens place for the option d display 
+    */
+    
+    output option_a[14],
+    output option_a_sel[4],
+    output option_b[14],
+    output option_b_sel[4],
+//    output option_c[14],
+//    output option_c_sel[4],
+//    output option_d[14],
+//    output option_d_sel[4],
+    output current[14],
+    output current_sel[4],
+    output target[14],
+    output target_sel[4]
   ) {
   
   sig rst;                  // reset signal
-  
+  lookuptable lookup;
   .clk(clk) {
     // The reset conditioner is used to synchronize the reset signal to the FPGA
     // clock. This ensures the entire FPGA comes out of reset at the same time.
     reset_conditioner reset_cond;
     //new_ge nge;
+    
     .rst(rst) {
       game_engine ge;
+      multi_seven_seg_a seg_a;
+      multi_seven_seg_b seg_b;
+//      multi_seven_seg_c seg_c;
+//      multi_seven_seg_d seg_d;
+      multi_seven_seg_current current_seg;
+      multi_seven_seg_target target_seg;
+      
     }
   }
   
@@ -31,21 +71,53 @@ module au_top (
     
     led = 8h00;             // turn LEDs off
     
-    io_led = 3x{{8h00}};    // turn LEDs off
-    io_seg = 8hff;          // turn segments off
-    io_sel = 4h0;           // select all digits, change to 4hf to disable
+
     
-    io_seg = 8b00000000;
-    
+    /*
     ge.btn[4-:5] = io_button[4-:5];    
     io_led[0][6-:7] = ge.current_out[6-:7]; 
     io_led[1][2-:3] = ge.btn_a[2-:3];
     io_led[1][6-:3] = ge.btn_b[2-:3];
     io_led[2][2-:3] = ge.btn_c[2-:3];
     io_led[2][6-:3] = ge.btn_d[2-:3];
-       
+    */   
     //io_led[0][6-:7] = nge.current_out;
     //nge.btn = io_button;
     
+    lookup.invalue_a = ge.a_display;
+    lookup.invalue_b = ge.b_display;
+    //lookup.invalue_c = ge.c_display;
+    //lookup.invalue_d = ge.d_display;
+    lookup.invalue_current = ge.current_out;
+    lookup.invalue_target = ge.target_display;
+    
+    ge.btn_a_sig = a_button;
+    ge.btn_b_sig = b_button;
+    //ge.btn_c_sig = c_button;
+    //ge.btn_d_sig = d_button;
+    ge.btn_reset_sig = reset_button;
+    ge.next_player_sig = next_player_button;
+    
+    seg_a.values = {lookup.out_a, lookup.out_a1};
+    seg_b.values = {lookup.out_b, lookup.out_b1};
+    //seg_c.values = {lookup.out_c, lookup.out_c1};
+    //seg_d.values = {lookup.out_d, lookup.out_d1};
+    current_seg.values = {lookup.out_current, lookup.out_current1};
+    target_seg.values = {lookup.out_target, lookup.out_target1};
+    
+    option_a = seg_a.seg;
+    option_a_sel = ~seg_a.sel;
+    option_b = seg_b.seg;
+    option_b_sel = ~seg_b.sel;
+    /*
+    option_c = seg_c.seg;
+    option_c_sel = ~seg_c.sel;
+    option_d = seg_d.seg;
+    option_d_sel = ~seg_d.sel;
+    */
+    current = current_seg.seg;
+    current_sel = ~current_seg.sel;
+    target = target_seg.seg;
+    target_sel = ~target_seg.sel;
   }
 }

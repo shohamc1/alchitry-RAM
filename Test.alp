@@ -1,16 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Test" board="Alchitry Au" language="Lucid" version="3">
   <files>
+    <src>multi_seven_seg_d.luc</src>
+    <src>multi_seven_seg_b.luc</src>
     <src>writer.luc</src>
-    <src>random.luc</src>
+    <src>ram_handler.luc</src>
+    <src>game_engine.luc</src>
+    <component>counter.luc</component>
+    <component>decoder.luc</component>
+    <src>multi_seven_seg_target.luc</src>
+    <src>multi_seven_seg_c.luc</src>
+    <src>multi_seven_seg_a.luc</src>
+    <src>lookuptable.luc</src>
+    <component>simple_ram.v</component>
     <src>new_ge.luc</src>
     <src top="true">au_top.luc</src>
-    <component>simple_ram.v</component>
-    <src>game_engine.luc</src>
+    <src>random.luc</src>
+    <src>seven_seg.luc</src>
     <component>reset_conditioner.luc</component>
-    <src>ram_handler.luc</src>
-    <constraint lib="true">alchitry.acf</constraint>
-    <constraint lib="true">io.acf</constraint>
-    <constraint lib="true">au.xdc</constraint>
+    <src>multi_seven_seg_current.luc</src>
+    <constraint>custom.xdc</constraint>
+    <constraint>custom.acf</constraint>
   </files>
 </project>
