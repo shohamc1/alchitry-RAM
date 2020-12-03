@@ -41,6 +41,7 @@ module game_engine (
       dff target[7](#INIT(20));  //where the target value is stored for checking in state.COMPARE
       dff temp[2](#INIT(0));
       fsm state = {BEGIN, IDLE, ADDITION, COMPARE, RESULT};
+      alu alu;
    }
    
   }
@@ -75,6 +76,11 @@ module game_engine (
     ed_d.in = bc_d.out;
     ed_next.in = bc_next.out;
     //ed_reset.in = bc_reset.out;
+    
+    
+    alu.a = 7bx;
+    alu.b = 7bx;
+    alu.alufn = 2bx;
     
     case(state.q) {
       state.BEGIN:
@@ -136,24 +142,36 @@ module game_engine (
         */
         //button_a_test.d= 0;
         if (temp.q == 0) {        
+          alu.a = current.q;
+          alu.b = button_a.q;
+          alu.alufn = 0;
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = current.q + button_a.q;
+          ram.in_number = alu.out;
         }  
         else if (temp.q == 1) {
+          alu.a = current.q;
+          alu.b = button_b.q;
+          alu.alufn = 0;
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = current.q + button_b.q;
+          ram.in_number = alu.out;
         }
         else if (temp.q == 2) {
+          alu.a = current.q;
+          alu.b = button_c.q;
+          alu.alufn = 0;
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = current.q + button_c.q;
+          ram.in_number = alu.out;
         }
         else if (temp.q == 3) {
+          alu.a = current.q;
+          alu.b = button_d.q;
+          alu.alufn = 0;          
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = current.q + button_d.q;
+          ram.in_number = alu.out;
         }                
         state.d = state.COMPARE;
       state.COMPARE:
@@ -162,7 +180,10 @@ module game_engine (
            If exceeded, 127 will be written to the ram for indication on the io_led in state.RESULT.
            If not exceeded, it will just jump to state.RESULT for assignment to current_out
         */
-        if (ram.out_number >= target.q) {
+        alu.a = target.q;
+        alu.b = ram.out_number;
+        alu.alufn = 3;   //check if b >= a
+        if (alu.out == 1) {
           state.d = state.BEGIN;  //An arbitrary is used here and stored in the ram for indication on the io_led for our checking
           
          }  else {

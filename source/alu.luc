@@ -1,0 +1,44 @@
+module alu (
+    input clk,
+    input rst,
+    input a[7],
+    input b[7],
+    input alufn[2],
+    
+    output out[7]
+  ) {
+  
+  .clk(clk){
+    .rst(rst){
+        comparator comp;}}
+  
+  adder add;
+
+  
+  always {
+    //temporary input signals to the alu components
+
+    add.a = 7bx;
+    add.b = 7bx;
+    add.alufn = 2bx;
+    comp.a = 7bx;
+    comp.b = 7bx;
+    comp.alufn = 2bx;
+    out = 7bx;
+
+    if (alufn == 0) {
+    // a,b,alufn are directed to the adder module
+      add.a = a;
+      add.b = b;
+      add.alufn = alufn;
+      out = add.out;
+      
+    } else if (alufn == 1 | alufn == 2 | alufn == 3) {
+    // a,b,alufn are directed to the comparator module
+      comp.a = a;
+      comp.b = b;
+      comp.alufn = alufn;
+      out = comp.out;
+    }
+  }
+}

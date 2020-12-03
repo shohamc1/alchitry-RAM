@@ -1,0 +1,16 @@
+module adder (    
+    input alufn[2], //alufn
+    input a[7],
+    input b[7],
+    
+    output out[7]
+  ) {
+
+  always {
+    out = 7bx;
+    if (alufn == 0) {
+      // perform addition
+      out = a + b;
+    }
+}
+}

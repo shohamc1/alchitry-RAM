@@ -1,0 +1,30 @@
+module comparator (    
+    input clk,
+    input rst,
+    input alufn[2], //alufn
+    input a[7],
+    input b[7],
+    
+    output out[7]
+  ) {
+  .clk(clk){
+    .rst(rst) {
+      dff holder[7](#INIT(0));
+      }
+    }
+  
+  
+  always {
+  
+
+    
+    case(alufn) {
+      1: holder.d = c{6b0, (a == b)}; // equals
+      2: holder.d = c{6b0, (a < b)}; // less than
+      3: holder.d = c{6b0, (a <= b)}; // less than or equals
+    }
+    
+    out = holder.q;   
+    
+  }
+}
