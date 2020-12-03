@@ -4,14 +4,12 @@ module au_top (
     output led [8],         // 8 user controllable LEDs
     input usb_rx,           // USB->Serial input
     output usb_tx,          // USB->Serial output
-    output io_led[3][8],
-
     
     input a_button,
     input b_button,     
-//    input c_button,
-//    input d_button,    
-    input reset_button, 
+    input c_button,
+    input d_button,    
+    //input reset_button, 
     input next_player_button,
     
 
@@ -29,18 +27,18 @@ module au_top (
     input out_d[7],  
     input out_d1[7],  //tens place for the option d display 
     */
-    output option_a[14],
-    output option_a_sel[4],
-    output option_b[14],
-    output option_b_sel[4],
-//    output option_c[14],
-//    output option_c_sel[4],
-//    output option_d[14],
-//    output option_d_sel[4],
-      output current[14],
-      output current_sel[4]
-//    output target[14],
-//    output target_sel[4]
+    output option_a[7],
+    output option_a_sel[2],
+    output option_b[7],
+    output option_b_sel[2],
+    output option_c[7],
+    output option_c_sel[2],
+    output option_d[7],
+    output option_d_sel[2],
+    output current[7],
+    output current_sel[2],
+    output target[7],
+    output target_sel[2]
   ) {
   
   sig rst;                  // reset signal
@@ -55,8 +53,8 @@ module au_top (
       game_engine ge;
       multi_seven_seg_a seg_a;
       multi_seven_seg_b seg_b;
-//      multi_seven_seg_c seg_c;
-//      multi_seven_seg_d seg_d;
+      multi_seven_seg_c seg_c;
+      multi_seven_seg_d seg_d;
       multi_seven_seg_current current_seg;
       multi_seven_seg_target target_seg;
       
@@ -73,9 +71,9 @@ module au_top (
     
     ge.btn_a_sig = a_button;
     ge.btn_b_sig = b_button;
-    //ge.btn_c_sig = c_button;
-    //ge.btn_d_sig = d_button;
-    ge.btn_reset_sig = reset_button;
+    ge.btn_c_sig = c_button;
+    ge.btn_d_sig = d_button;
+    //ge.btn_reset_sig = reset_button;
     ge.next_player_sig = next_player_button;
     
     
@@ -92,16 +90,18 @@ module au_top (
     
     lookup.invalue_a = ge.a_display;
     lookup.invalue_b = ge.b_display;
-    //lookup.invalue_c = ge.c_display;
-    //lookup.invalue_d = ge.d_display;
+    lookup.invalue_c = ge.c_display;
+    lookup.invalue_d = ge.d_display;
+    
+    //if (ge.current_out 
     lookup.invalue_current = ge.current_out;
     lookup.invalue_target = ge.target_display;
     
     
     seg_a.values = {lookup.out_a, lookup.out_a1};
     seg_b.values = {lookup.out_b, lookup.out_b1};
-    //seg_c.values = {lookup.out_c, lookup.out_c1};
-    //seg_d.values = {lookup.out_d, lookup.out_d1};
+    seg_c.values = {lookup.out_c, lookup.out_c1};
+    seg_d.values = {lookup.out_d, lookup.out_d1};
     current_seg.values = {lookup.out_current, lookup.out_current1};
     target_seg.values = {lookup.out_target, lookup.out_target1};
     
@@ -109,19 +109,19 @@ module au_top (
     option_a_sel = ~seg_a.sel;
     option_b = seg_b.seg;
     option_b_sel = ~seg_b.sel;
-    /*
+    
     option_c = seg_c.seg;
     option_c_sel = ~seg_c.sel;
     option_d = seg_d.seg;
     option_d_sel = ~seg_d.sel;
-    */
+    
     current = current_seg.seg;
     current_sel = ~current_seg.sel;
-//    target = target_seg.seg;
-//    target_sel = ~target_seg.sel;
-    io_led[0][7-:8] = ge.a_display[3-:4];
-    io_led[1][7-:8] = ge.b_display[3-:4];
-    io_led[2][7-:8] = ge.current_out[6-:7];
+    target = target_seg.seg;
+    target_sel = ~target_seg.sel;
+//    io_led[0][7-:8] = ge.a_display[3-:4];
+//    io_led[1][7-:8] = ge.b_display[3-:4];
+//    io_led[2][7-:8] = ge.current_out[6-:7];
     
   }
 }

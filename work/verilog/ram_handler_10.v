@@ -4,7 +4,7 @@
    This is a temporary file and any changes made to it will be destroyed.
 */
 
-module ram_handler_3 (
+module ram_handler_10 (
     input location,
     input state,
     input clk,
@@ -18,7 +18,7 @@ module ram_handler_3 (
   reg [1-1:0] M_ram_address;
   reg [7-1:0] M_ram_write_data;
   reg [1-1:0] M_ram_write_en;
-  simple_ram_5 #(.SIZE(3'h7), .DEPTH(2'h2)) ram (
+  simple_ram_17 #(.SIZE(3'h7), .DEPTH(2'h2)) ram (
     .clk(clk),
     .address(M_ram_address),
     .write_data(M_ram_write_data),

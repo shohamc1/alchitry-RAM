@@ -10,39 +10,160 @@ module au_top_0 (
     output reg [7:0] led,
     input usb_rx,
     output reg usb_tx,
-    output reg [23:0] io_led,
-    output reg [7:0] io_seg,
-    output reg [3:0] io_sel,
-    input [4:0] io_button,
-    input [23:0] io_dip
+    input a_button,
+    input b_button,
+    input c_button,
+    input d_button,
+    input next_player_button,
+    output reg [6:0] option_a,
+    output reg [1:0] option_a_sel,
+    output reg [6:0] option_b,
+    output reg [1:0] option_b_sel,
+    output reg [6:0] option_c,
+    output reg [1:0] option_c_sel,
+    output reg [6:0] option_d,
+    output reg [1:0] option_d_sel,
+    output reg [6:0] current,
+    output reg [1:0] current_sel,
+    output reg [6:0] target,
+    output reg [1:0] target_sel
   );
   
   
   
   reg rst;
   
+  wire [4-1:0] M_lookup_out_a;
+  wire [4-1:0] M_lookup_out_a1;
+  wire [4-1:0] M_lookup_out_b;
+  wire [4-1:0] M_lookup_out_b1;
+  wire [4-1:0] M_lookup_out_c;
+  wire [4-1:0] M_lookup_out_c1;
+  wire [4-1:0] M_lookup_out_d;
+  wire [4-1:0] M_lookup_out_d1;
+  wire [4-1:0] M_lookup_out_current;
+  wire [4-1:0] M_lookup_out_current1;
+  wire [4-1:0] M_lookup_out_target;
+  wire [4-1:0] M_lookup_out_target1;
+  reg [4-1:0] M_lookup_invalue_a;
+  reg [4-1:0] M_lookup_invalue_b;
+  reg [4-1:0] M_lookup_invalue_c;
+  reg [4-1:0] M_lookup_invalue_d;
+  reg [7-1:0] M_lookup_invalue_current;
+  reg [7-1:0] M_lookup_invalue_target;
+  lookuptable_1 lookup (
+    .invalue_a(M_lookup_invalue_a),
+    .invalue_b(M_lookup_invalue_b),
+    .invalue_c(M_lookup_invalue_c),
+    .invalue_d(M_lookup_invalue_d),
+    .invalue_current(M_lookup_invalue_current),
+    .invalue_target(M_lookup_invalue_target),
+    .out_a(M_lookup_out_a),
+    .out_a1(M_lookup_out_a1),
+    .out_b(M_lookup_out_b),
+    .out_b1(M_lookup_out_b1),
+    .out_c(M_lookup_out_c),
+    .out_c1(M_lookup_out_c1),
+    .out_d(M_lookup_out_d),
+    .out_d1(M_lookup_out_d1),
+    .out_current(M_lookup_out_current),
+    .out_current1(M_lookup_out_current1),
+    .out_target(M_lookup_out_target),
+    .out_target1(M_lookup_out_target1)
+  );
+  
   wire [1-1:0] M_reset_cond_out;
   reg [1-1:0] M_reset_cond_in;
-  reset_conditioner_1 reset_cond (
+  reset_conditioner_2 reset_cond (
     .clk(clk),
     .in(M_reset_cond_in),
     .out(M_reset_cond_out)
   );
   wire [7-1:0] M_ge_current_out;
-  wire [3-1:0] M_ge_btn_a;
-  wire [3-1:0] M_ge_btn_b;
-  wire [3-1:0] M_ge_btn_c;
-  wire [3-1:0] M_ge_btn_d;
-  reg [5-1:0] M_ge_btn;
-  game_engine_2 ge (
+  wire [7-1:0] M_ge_target_display;
+  wire [4-1:0] M_ge_a_display;
+  wire [4-1:0] M_ge_b_display;
+  wire [4-1:0] M_ge_c_display;
+  wire [4-1:0] M_ge_d_display;
+  reg [1-1:0] M_ge_btn_a_sig;
+  reg [1-1:0] M_ge_btn_b_sig;
+  reg [1-1:0] M_ge_btn_c_sig;
+  reg [1-1:0] M_ge_btn_d_sig;
+  reg [1-1:0] M_ge_next_player_sig;
+  game_engine_3 ge (
     .clk(clk),
     .rst(rst),
-    .btn(M_ge_btn),
+    .btn_a_sig(M_ge_btn_a_sig),
+    .btn_b_sig(M_ge_btn_b_sig),
+    .btn_c_sig(M_ge_btn_c_sig),
+    .btn_d_sig(M_ge_btn_d_sig),
+    .next_player_sig(M_ge_next_player_sig),
     .current_out(M_ge_current_out),
-    .btn_a(M_ge_btn_a),
-    .btn_b(M_ge_btn_b),
-    .btn_c(M_ge_btn_c),
-    .btn_d(M_ge_btn_d)
+    .target_display(M_ge_target_display),
+    .a_display(M_ge_a_display),
+    .b_display(M_ge_b_display),
+    .c_display(M_ge_c_display),
+    .d_display(M_ge_d_display)
+  );
+  wire [7-1:0] M_seg_a_seg;
+  wire [2-1:0] M_seg_a_sel;
+  reg [8-1:0] M_seg_a_values;
+  multi_seven_seg_a_4 seg_a (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_a_values),
+    .seg(M_seg_a_seg),
+    .sel(M_seg_a_sel)
+  );
+  wire [7-1:0] M_seg_b_seg;
+  wire [2-1:0] M_seg_b_sel;
+  reg [8-1:0] M_seg_b_values;
+  multi_seven_seg_b_5 seg_b (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_b_values),
+    .seg(M_seg_b_seg),
+    .sel(M_seg_b_sel)
+  );
+  wire [7-1:0] M_seg_c_seg;
+  wire [2-1:0] M_seg_c_sel;
+  reg [8-1:0] M_seg_c_values;
+  multi_seven_seg_c_6 seg_c (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_c_values),
+    .seg(M_seg_c_seg),
+    .sel(M_seg_c_sel)
+  );
+  wire [7-1:0] M_seg_d_seg;
+  wire [2-1:0] M_seg_d_sel;
+  reg [8-1:0] M_seg_d_values;
+  multi_seven_seg_d_7 seg_d (
+    .clk(clk),
+    .rst(rst),
+    .values(M_seg_d_values),
+    .seg(M_seg_d_seg),
+    .sel(M_seg_d_sel)
+  );
+  wire [7-1:0] M_current_seg_seg;
+  wire [2-1:0] M_current_seg_sel;
+  reg [8-1:0] M_current_seg_values;
+  multi_seven_seg_current_8 current_seg (
+    .clk(clk),
+    .rst(rst),
+    .values(M_current_seg_values),
+    .seg(M_current_seg_seg),
+    .sel(M_current_seg_sel)
+  );
+  wire [7-1:0] M_target_seg_seg;
+  wire [2-1:0] M_target_seg_sel;
+  reg [8-1:0] M_target_seg_values;
+  multi_seven_seg_target_9 target_seg (
+    .clk(clk),
+    .rst(rst),
+    .values(M_target_seg_values),
+    .seg(M_target_seg_seg),
+    .sel(M_target_seg_sel)
   );
   
   always @* begin
@@ -50,15 +171,34 @@ module au_top_0 (
     rst = M_reset_cond_out;
     usb_tx = usb_rx;
     led = 8'h00;
-    io_led = 24'h000000;
-    io_seg = 8'hff;
-    io_sel = 4'h0;
-    io_seg = 8'h00;
-    M_ge_btn[0+4-:5] = io_button[0+4-:5];
-    io_led[0+0+6-:7] = M_ge_current_out[0+6-:7];
-    io_led[8+0+2-:3] = M_ge_btn_a[0+2-:3];
-    io_led[8+4+2-:3] = M_ge_btn_b[0+2-:3];
-    io_led[16+0+2-:3] = M_ge_btn_c[0+2-:3];
-    io_led[16+4+2-:3] = M_ge_btn_d[0+2-:3];
+    M_ge_btn_a_sig = a_button;
+    M_ge_btn_b_sig = b_button;
+    M_ge_btn_c_sig = c_button;
+    M_ge_btn_d_sig = d_button;
+    M_ge_next_player_sig = next_player_button;
+    M_lookup_invalue_a = M_ge_a_display;
+    M_lookup_invalue_b = M_ge_b_display;
+    M_lookup_invalue_c = M_ge_c_display;
+    M_lookup_invalue_d = M_ge_d_display;
+    M_lookup_invalue_current = M_ge_current_out;
+    M_lookup_invalue_target = M_ge_target_display;
+    M_seg_a_values = {M_lookup_out_a, M_lookup_out_a1};
+    M_seg_b_values = {M_lookup_out_b, M_lookup_out_b1};
+    M_seg_c_values = {M_lookup_out_c, M_lookup_out_c1};
+    M_seg_d_values = {M_lookup_out_d, M_lookup_out_d1};
+    M_current_seg_values = {M_lookup_out_current, M_lookup_out_current1};
+    M_target_seg_values = {M_lookup_out_target, M_lookup_out_target1};
+    option_a = M_seg_a_seg;
+    option_a_sel = ~M_seg_a_sel;
+    option_b = M_seg_b_seg;
+    option_b_sel = ~M_seg_b_sel;
+    option_c = M_seg_c_seg;
+    option_c_sel = ~M_seg_c_sel;
+    option_d = M_seg_d_seg;
+    option_d_sel = ~M_seg_d_sel;
+    current = M_current_seg_seg;
+    current_sel = ~M_current_seg_sel;
+    target = M_target_seg_seg;
+    target_sel = ~M_target_seg_sel;
   end
 endmodule

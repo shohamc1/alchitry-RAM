@@ -1,26 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Test" board="Alchitry Au" language="Lucid" version="3">
   <files>
+    <src>writer.luc</src>
+    <src>random.luc</src>
+    <src>multi_seven_seg_b.luc</src>
     <src>new_ge.luc</src>
-    <component>counter.luc</component>
+    <component>pipeline.luc</component>
     <src>multi_seven_seg_d.luc</src>
+    <component>counter.luc</component>
+    <src>multi_seven_seg_target.luc</src>
     <src>ram_handler.luc</src>
     <component>decoder.luc</component>
-    <src>seven_seg.luc</src>
-    <src>multi_seven_seg_b.luc</src>
-    <src>multi_seven_seg_current.luc</src>
-    <src>multi_seven_seg_target.luc</src>
     <src>lookuptable.luc</src>
-    <component>simple_ram.v</component>
-    <src top="true">au_top.luc</src>
-    <src>multi_seven_seg_c.luc</src>
-    <component>reset_conditioner.luc</component>
-    <src>writer.luc</src>
-    <component>edge_detector.luc</component>
-    <src>game_engine.luc</src>
+    <src>seven_seg.luc</src>
     <src>multi_seven_seg_a.luc</src>
-    <src>random.luc</src>
-    <constraint>new.acf</constraint>
-    <constraint>new.xdc</constraint>
+    <src top="true">au_top.luc</src>
+    <component>simple_ram.v</component>
+    <src>multi_seven_seg_c.luc</src>
+    <src>game_engine.luc</src>
+    <component>reset_conditioner.luc</component>
+    <component>edge_detector.luc</component>
+    <src>multi_seven_seg_current.luc</src>
+    <component>button_conditioner.luc</component>
+    <constraint>try.xdc</constraint>
+    <constraint>try.acf</constraint>
   </files>
 </project>

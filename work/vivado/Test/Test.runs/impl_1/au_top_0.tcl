@@ -137,9 +137,8 @@ OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
   add_files -quiet C:/Users/Shoham/Desktop/Textbooks/Test/work/vivado/Test/Test.runs/synth_1/au_top_0.dcp
 OPTRACE "read constraints: implementation" START { }
-  read_xdc C:/Users/Shoham/Desktop/Textbooks/Test/work/constraint/alchitry.xdc
-  read_xdc C:/Users/Shoham/Desktop/Textbooks/Test/work/constraint/io.xdc
-  read_xdc {{C:/Program Files/Alchitry/Alchitry Labs/library/components/au.xdc}}
+  read_xdc C:/Users/Shoham/Desktop/Textbooks/Test/constraint/try.xdc
+  read_xdc C:/Users/Shoham/Desktop/Textbooks/Test/work/constraint/try.xdc
 OPTRACE "read constraints: implementation" END { }
 OPTRACE "add files" END { }
 OPTRACE "link_design" START { }

@@ -4,25 +4,32 @@ module game_engine (
     //input btn[5], // 0-A UP, 1-B CENTER, 2-C DOWN, 3-D LEFT, 4-RIGHT 
     input btn_a_sig,
     input btn_b_sig,
-    //input btn_c_sig,
-    //input btn_d_sig,
-    input btn_reset_sig,
+    input btn_c_sig,
+    input btn_d_sig,
+    //input btn_reset_sig,
     input next_player_sig,
     
     output current_out[7],
     output target_display[7],
     output a_display[4],
-    output b_display[4]
-    //output c_display[4],
-    //output d_display[4]
-
-    //output target[7]
+    output b_display[4],
+    output c_display[4],
+    output d_display[4]
   ) {
-  //const TARGET = 20; 
- 
   .clk(clk) {
     ram_handler ram; //we use our ram only for storing current
-    edge_detector edge_detector(#RISE(1), #FALL(0));
+    edge_detector ed_a(#RISE(1), #FALL(0));
+    edge_detector ed_b(#RISE(1), #FALL(0));
+    edge_detector ed_c(#RISE(1), #FALL(0));
+    edge_detector ed_d(#RISE(1), #FALL(0));
+    edge_detector ed_next(#RISE(1), #FALL(0));
+    //edge_detector ed_reset(#RISE(1), #FALL(0));
+    button_conditioner bc_a;
+    button_conditioner bc_b;
+    button_conditioner bc_c;
+    button_conditioner bc_d;
+    button_conditioner bc_next;
+    //button_conditioner bc_reset;
     .rst(rst) {
       random random;  
       //dff button_a_test[1](#INIT(0));
@@ -41,22 +48,33 @@ module game_engine (
     
 
   always {
-    edge_detector.in = 0;
-    //button_a_test.d = 0;
     random.seed = 128h843233523a61357423b6225651512c62;
-    random.next = btn_a_sig | btn_b_sig; //| btn_c_sig | btn_d_sig;
+    random.next = btn_a_sig | btn_b_sig | btn_c_sig | btn_d_sig;
     current_out = 0;
 
-   
     ram.location = 1bx;
     ram.state = 0;
     ram.in_number = 0;
     
-    target_display = 0;
+    target_display = 7hxx;
     a_display = 4hx;
     b_display = 4hx;
-//    c_display = 0;
-//    d_display = 0;
+    c_display = 4hx;
+    d_display = 4hx;
+    
+    bc_a.in = btn_a_sig;
+    bc_b.in = btn_b_sig;
+    bc_c.in = btn_c_sig;
+    bc_d.in = btn_d_sig;
+    bc_next.in = next_player_sig;
+    //bc_reset.in = btn_reset_sig;
+    
+    ed_a.in = bc_a.out;
+    ed_b.in = bc_b.out;
+    ed_c.in = bc_c.out;
+    ed_d.in = bc_d.out;
+    ed_next.in = bc_next.out;
+    //ed_reset.in = bc_reset.out;
     
     case(state.q) {
       state.BEGIN:
@@ -65,6 +83,7 @@ module game_engine (
            - instantiate current value to 0 (done implicitly in dff declaration)
 
         */
+        target.d = 20;
 
         button_a.d = random.num[2-:3] + random.num[6-:2];
         button_b.d = random.num[4-:3] + random.num[14-:2];
@@ -77,8 +96,7 @@ module game_engine (
 
         state.d = state.IDLE;
       state.IDLE:
-        edge_detector.in = btn_a_sig;
-        target.d = 20;
+        //edge_detector.in = btn_a_sig;
         
         ram.state = 0 ;
         ram.location = 0;
@@ -88,25 +106,26 @@ module game_engine (
         target_display = target.q;
         a_display = button_a.q;
         b_display = button_b.q;
-        //c_display = button_c.q;                
-        //d_display = button_d.q;
+        c_display = button_c.q;                
+        d_display = button_d.q;
         
                 
-        if (edge_detector.out == 1) {
+        if (ed_a.out == 1) {
           state.d = state.ADDITION;
           temp.d = 0;
-        } else if (btn_b_sig == 1){
+        } else if (ed_b.out == 1){
           state.d = state.ADDITION;
           temp.d = 1;
-     /*   } else if (btn_c_sig == 1){
+        } else if (ed_c.out == 1){
           state.d = state.ADDITION;
           temp.d = 2;          
-        } else if (btn_d_sig == 1) {
+        } else if (ed_d.out == 1) {
           state.d = state.ADDITION;
-          temp.d = 3;        */
-        } else if (btn_reset_sig == 1) {
-          state.d = state.BEGIN; //reset button
-        }
+          temp.d = 3;        
+        } 
+//          else if (ed_reset.out == 1) {
+//          state.d = state.BEGIN; //reset button
+//        }
 
       state.ADDITION:
         /*
@@ -134,7 +153,7 @@ module game_engine (
         else if (temp.q == 3) {
           ram.state = 1;
           ram.location = 0;
-          ram.in_number = current.q + button_c.q;
+          ram.in_number = current.q + button_d.q;
         }                
         state.d = state.COMPARE;
       state.COMPARE:
@@ -144,27 +163,27 @@ module game_engine (
            If not exceeded, it will just jump to state.RESULT for assignment to current_out
         */
         if (ram.out_number >= target.q) {
-          ram.state = 1;
-          ram.location = 0;
-          ram.in_number = 127;  //An arbitrary is used here and stored in the ram for indication on the io_led for our checking
-         }  
-        state.d = state.RESULT;
+          state.d = state.BEGIN;  //An arbitrary is used here and stored in the ram for indication on the io_led for our checking
+          
+         }  else {
+          state.d = state.RESULT;
+        }
       state.RESULT:
         
-        ram.state=0;
-        ram.location=0;
-        current_out=ram.out_number;
+        ram.state = 0;
+        ram.location = 0;
+        current_out = ram.out_number;
         current.d = ram.out_number;
-        if (next_player_sig==1) {
+        if (ed_next.out ==1) {
           state.d = state.IDLE;  //Press btn[0] for next player's turn, and the process will repeat till the losing condition is met, and a different io_led will be shown. 
           button_a.d = random.num[2-:3] + random.num[6-:2];
           button_b.d = random.num[8-:3] + random.num[5-:2];
           button_c.d = random.num[2-:3] + random.num[11-:2];
           button_d.d = random.num[6-:2] + random.num[3-:2];
         }
-        if (btn_reset_sig==1) {
-          state.d = state.BEGIN; //reset button
-        }
+ //       if (ed_reset.out == 1) {
+ //         state.d = state.BEGIN; //reset button
+ //       }
     }
   }
 }
